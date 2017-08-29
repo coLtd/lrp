@@ -17,13 +17,13 @@
 %% ====================================================================
 
 start_server() ->
-	case os:getenv("Erl_APP") of
-		false -> 
-			exit({ebadEnv,"HOME"});
-		Home ->
-%% 			start_server(Home ++ "lib_chan.conf")
-		start_server(Home ++ "frpc.conf")
-	end.
+%% 	case os:getenv("Erl_APP") of
+%% 		false -> 
+%% 			exit({ebadEnv,"HOME"});
+%% 		Home ->
+%% 			start_server(Home ++ "lpc.conf")
+%% 	end.
+	start_server("lpc.conf").
 
 start_server(ConfigFile) ->
 %% 	io:format("lib_chan starting:~p~n",[ConfigFile]),

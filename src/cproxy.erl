@@ -15,7 +15,7 @@
 
 start() ->
 	io:format("client proxy starting~n"),
-	{ok,MM} = lib_chan:connect("localhost", 2233, trans_server, "qwerty", {yes,go}),
+	{ok,MM} = lib_chan:connect("localhost", 2233, ts, "qwerty", {yes,go}),
 	MM ! {send, {reg,client}},
 	proxy_loop(MM).
 
