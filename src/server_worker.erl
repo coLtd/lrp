@@ -2,7 +2,7 @@
 %% @doc @todo Add description to mod_math.
 
 
--module(worker).
+-module(server_worker).
 
 %% ====================================================================
 %% API functions
