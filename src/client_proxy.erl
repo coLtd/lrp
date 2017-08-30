@@ -15,14 +15,10 @@
 
 start() ->
 	io:format("client proxy starting~n"),
-	case lib_chan:connect("127.0.0.1", 2233, ts, "qwerty", {yes,go}) of
-		{ok,MM} ->
-			S = self(),
-			Worker = client_worker:start(fun(Socket) -> loop(Socket,S) end),
-			proxy_loop(MM,Worker);
-		Error ->
-			Error
-	end.	
+	{ok,MM} = lib_chan:connect("127.0.0.1", 2233, ts, "qwerty", {yes,go}),
+	S = self(),
+	Worker = client_worker:start(fun(Socket) -> loop(Socket,S) end),
+	proxy_loop(MM,Worker).	
 
 proxy_loop(MM,Worker) ->
 	receive
