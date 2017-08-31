@@ -22,6 +22,7 @@ run(MM,ArgC,ArgS) ->
 proxy_loop(MM,Worker) ->
 	receive
 		{chan,MM,Bin} ->
+			io:format("server proxy received client message ~p~n", [Bin]),
 			Worker ! {client,Bin},
 		    proxy_loop(MM,Worker);
 		{chan_closed,MM} ->
@@ -38,9 +39,11 @@ proxy_loop(MM,Worker) ->
 loop(Socket,Master) ->
 	receive
 		{tcp,Socket,Bin} ->
+			io:format("worker received server message ~p~n", [Bin]),
 			Master ! {worker,Bin},
 			loop(Socket,Master);
 		{client,Bin} ->
+			io:format("worker send client message ~p~n", [Bin]),
 			gen_tcp:send(Socket, Bin),
 			loop(Socket,Master);
 		{tcp_closed,Socket} ->

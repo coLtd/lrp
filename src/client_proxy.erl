@@ -17,16 +17,17 @@ start() ->
 	io:format("client proxy starting~n"),
 	{ok,MM} = lib_chan:connect("127.0.0.1", 2233, ts, "qwerty", {yes,go}),
 	S = self(),
-	Worker = client_worker:start(fun(Socket) -> loop(Socket,S) end),
+	Worker = spawn(fun() -> client_worker:start(fun(Socket) -> loop(Socket,S) end) end) ,
 	proxy_loop(MM,Worker).	
 
 proxy_loop(MM,Worker) ->
 	receive
 		{chan,MM,Bin} ->
-    	   io:format("client proxy received message:~p~n", [Bin]),
+    	   io:format("client proxy received server message:~p~n", [Bin]),
 		   Worker ! {proxy,Bin},
 		   proxy_loop(MM,Worker);		
 	    {worker,Bin} ->
+		   io:format("client proxy received worker message:~p~n", [Bin]),
 		   MM ! {send, Bin},
 		   proxy_loop(MM,Worker);	
 		Any ->
@@ -36,10 +37,11 @@ proxy_loop(MM,Worker) ->
 loop(Socket,Master) ->
 	receive
 	  {tcp,Socket,Bin} ->
+		 io:format("client worker received server message:~p~n",[Bin]),
 		 Master ! {worker,Bin},
 		 loop(Socket,Master);
 	  {proxy,Bin} ->
-		 io:format("client worker received message:~p~n",[Bin])	,
+		 io:format("client worker received proxy message:~p~n",[Bin]),
 		 gen_tcp:send(Socket,Bin),
 		 loop(Socket,Master);
 	  {tcp_closed,Socket} ->

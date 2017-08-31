@@ -23,13 +23,13 @@ start_server() ->
 %% 		Home ->
 %% 			start_server(Home ++ "lpc.conf")
 %% 	end.
-	start_server("lpc.conf").
+	start_server("lrps.conf").
 
 start_server(ConfigFile) ->
 %% 	io:format("lib_chan starting:~p~n",[ConfigFile]),
 	case file:consult(ConfigFile) of
 		{ok,ConfigData} ->
-%% 			io:format("ConfigData=~p~n",[ConfigData]),
+			io:format("ConfigData=~p~n",[ConfigData]),
 			case check_terms(ConfigData) of
 				[] ->
 					start_server1(ConfigData);
