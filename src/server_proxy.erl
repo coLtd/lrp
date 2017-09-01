@@ -14,7 +14,7 @@
 %% ====================================================================
 
 run(MM,ArgC,ArgS) ->
-	io:format("server proxy:run starting~n ArgC=~p ArgS=~p~n",[ArgC,ArgS]),
+%% 	io:format("server proxy:run starting~n ArgC=~p ArgS=~p~n",[ArgC,ArgS]),
 	S = self(),
 	server_worker:start(fun(Socket) -> loop(Socket,S) end),
 	proxy_loop(MM).
@@ -24,7 +24,7 @@ proxy_loop(MM) ->
 		{chan,MM,Bin} ->			
 			case Bin of
 				{Socket,Msg} ->
-					io:format("server proxy received client message ~p~n", [Msg]),
+					io:format("receive: ~p~n", [Msg]),
 					gen_tcp:send(Socket, Msg)					
 			end,
 			proxy_loop(MM);
@@ -32,7 +32,7 @@ proxy_loop(MM) ->
 			io:format("server proxy stopping~n"),
 			exit(normal);
 		{worker,Socket,Bin} ->
-			io:format("server proxy received worker message ~p~n", [Bin]),
+			io:format("send: ~p~n", [Bin]),
 			MM ! {send,{Socket,Bin}},
 			proxy_loop(MM);
 		Any ->
@@ -42,7 +42,7 @@ proxy_loop(MM) ->
 loop(Socket,Master) ->
 	receive
 		{tcp,Socket,Bin} ->
-			io:format("worker received server message ~p~n", [Bin]),			
+%% 			io:format("worker received server message ~p~n", [Bin]),			
 			Master ! {worker,Socket,Bin},
 			loop(Socket,Master);
 		{tcp_closed,Socket} ->
