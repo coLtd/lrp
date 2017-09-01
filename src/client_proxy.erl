@@ -23,12 +23,17 @@ start() ->
 proxy_loop(MM,Worker) ->
 	receive
 		{chan,MM,Bin} ->
-    	   io:format("client proxy received server message:~p~n", [Bin]),
-		   Worker ! {proxy,Bin},
+		   case Bin of
+            {Socket,Msg} ->
+				put(Worker,Socket),
+				io:format("client proxy received server message:~p~n", [Msg]),
+			    Worker ! {proxy,Msg}
+		   end,		  
 		   proxy_loop(MM,Worker);		
 	    {worker,Bin} ->
 		   io:format("client proxy received worker message:~p~n", [Bin]),
-		   MM ! {send, Bin},
+		   Socket = get(Worker),	
+		   MM ! {send, {Socket,Bin}},
 		   proxy_loop(MM,Worker);	
 		Any ->
 		  io:format("client proxy received:~p~n",[Any])

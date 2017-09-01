@@ -16,22 +16,25 @@
 run(MM,ArgC,ArgS) ->
 	io:format("server proxy:run starting~n ArgC=~p ArgS=~p~n",[ArgC,ArgS]),
 	S = self(),
-	Worker = spawn(fun() -> server_worker:start(fun(Socket) -> loop(Socket,S) end,100) end),
-	proxy_loop(MM,Worker).
+	server_worker:start(fun(Socket) -> loop(Socket,S) end),
+	proxy_loop(MM).
 
-proxy_loop(MM,Worker) ->
+proxy_loop(MM) ->
 	receive
-		{chan,MM,Bin} ->
-			io:format("server proxy received client message ~p~n", [Bin]),
-			Worker ! {client,Bin},
-		    proxy_loop(MM,Worker);
+		{chan,MM,Bin} ->			
+			case Bin of
+				{Socket,Msg} ->
+					io:format("server proxy received client message ~p~n", [Msg]),
+					gen_tcp:send(Socket, Msg)					
+			end,
+			proxy_loop(MM);
 		{chan_closed,MM} ->
 			io:format("server proxy stopping~n"),
 			exit(normal);
-		{worker,Bin} ->
+		{worker,Socket,Bin} ->
 			io:format("server proxy received worker message ~p~n", [Bin]),
-			MM ! {send,Bin},
-			proxy_loop(MM,Worker);
+			MM ! {send,{Socket,Bin}},
+			proxy_loop(MM);
 		Any ->
 			io:format("server proxy received:~p~n",[Any])
 	end.	
@@ -39,12 +42,8 @@ proxy_loop(MM,Worker) ->
 loop(Socket,Master) ->
 	receive
 		{tcp,Socket,Bin} ->
-			io:format("worker received server message ~p~n", [Bin]),
-			Master ! {worker,Bin},
-			loop(Socket,Master);
-		{client,Bin} ->
-			io:format("worker send client message ~p~n", [Bin]),
-			gen_tcp:send(Socket, Bin),
+			io:format("worker received server message ~p~n", [Bin]),			
+			Master ! {worker,Socket,Bin},
 			loop(Socket,Master);
 		{tcp_closed,Socket} ->
 			io:format("socket closed~n");

@@ -14,5 +14,5 @@
 %% ====================================================================
 
 start(Fun) ->
-	{ok,Socket} = gen_tcp:connect("10.88.20.63", 4389, [binary, {packet,0}]),
+	{ok,Socket} = gen_tcp:connect("192.168.1.106", 3389, [binary, {packet,0}]),
 	Fun(Socket).
